@@ -1,4 +1,4 @@
-﻿using ExileCore.Shared;
+﻿using ExileCore2.Shared;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -39,23 +39,19 @@ namespace InputHumanizer.Input
             await Task.Delay(GenerateDelay(), cancellationToken);
 
             Plugin.DebugLog("KeyDown: " + key);
-            ExileCore.Input.KeyDown(key);
+            ExileCore2.Input.KeyDown(key);
 
             ButtonDelays[key] = DateTime.Now.AddMilliseconds(GenerateDelay());
             return true;
         }
 
         public async SyncTask<bool> KeyUp(Keys key, bool releaseImmediately = false, CancellationToken cancellationToken = default)
-        {// If we were told to release immediately, skip this logic
+        {
             if (!releaseImmediately)
             {
-                // Pull the generated delay for this key
                 ButtonDelays.TryGetValue(key, out DateTime releaseTime);
-
-                // Save off the 'now' date once since we use it multiple times
                 DateTime now = DateTime.Now;
 
-                // If we are not allowed to release this key yet, we need to sleep until we can
                 if (now < releaseTime)
                 {
                     TimeSpan remainingDelay = releaseTime.Subtract(now);
@@ -65,11 +61,8 @@ namespace InputHumanizer.Input
             }
 
             Plugin.DebugLog("KeyUp: " + key);
-            // Delays should now be handled just fine
-            ExileCore.Input.KeyUp(key);
-
+            ExileCore2.Input.KeyUp(key);
             ButtonDelays.Remove(key);
-
             return true;
         }
 
@@ -90,7 +83,6 @@ namespace InputHumanizer.Input
 
         private async SyncTask<bool> Click(MouseButtons button, Vector2? coordinate, CancellationToken cancellationToken = default)
         {
-            // Only if a position is specified do we move the mouse
             if (coordinate != null)
             {
                 if (!await MoveMouse(coordinate.Value, cancellationToken))
@@ -98,17 +90,13 @@ namespace InputHumanizer.Input
             }
 
             Plugin.DebugLog("Click Delay");
-            // We will also have a delay on the click, not just the move.
             await Task.Delay(GenerateDelay(), cancellationToken);
 
             Plugin.DebugLog("Click " + button);
-            // Delays should now be handled just fine
-            ExileCore.Input.Click(button);
+            ExileCore2.Input.Click(button);
 
             Plugin.DebugLog("Click Delay 2");
-            // Do we want to sleep TWICE here?
             await Task.Delay(GenerateDelay(), cancellationToken);
-
             return true;
         }
 
@@ -119,7 +107,6 @@ namespace InputHumanizer.Input
 
         public async SyncTask<bool> VerticalScroll(bool forward, int numClicks, Vector2? coordinate, CancellationToken cancellationToken = default)
         {
-            // Only if a position is specified do we move the mouse
             if (coordinate != null)
             {
                 if (!await MoveMouse(coordinate.Value, cancellationToken))
@@ -127,17 +114,13 @@ namespace InputHumanizer.Input
             }
 
             Plugin.DebugLog("Vertical Scroll Delay");
-            // We will also have a delay on the click, not just the move.
             await Task.Delay(GenerateDelay(), cancellationToken);
 
             Plugin.DebugLog("Vertical Scroll");
-            // Delays should now be handled just fine
-            ExileCore.Input.VerticalScroll(forward, numClicks);
+            ExileCore2.Input.VerticalScroll(forward, numClicks);
 
             Plugin.DebugLog("Vertical Scroll Delay 2");
-            // Do we want to sleep TWICE here?
             await Task.Delay(GenerateDelay(), cancellationToken);
-
             return true;
         }
 
@@ -145,11 +128,24 @@ namespace InputHumanizer.Input
         {
             if (Settings.UseWindMouse)
             {
-                return await MoveMouseWindMouseImpl(coordinate, Settings.GravityStrength, Settings.WindStrength, Settings.WindMouseMinimumDelay, Settings.WindMouseMaximumDelay, Settings.StepSize, Settings.TargetArea, cancellationToken);
+                return await MoveMouseWindMouseImpl(
+                    coordinate, 
+                    Settings.GravityStrength, 
+                    Settings.WindStrength, 
+                    Settings.WindMouseMinimumDelay, 
+                    Settings.WindMouseMaximumDelay, 
+                    Settings.StepSize, 
+                    Settings.TargetArea, 
+                    cancellationToken);
             }
             else
             {
-                return await MoveMouse(coordinate, Settings.MaximumInterpolationDistance, Settings.MinimumInterpolationDelay, Settings.MaximumInterpolationDelay, cancellationToken);
+                return await MoveMouse(
+                    coordinate, 
+                    Settings.MaximumInterpolationDistance, 
+                    Settings.MinimumInterpolationDelay, 
+                    Settings.MaximumInterpolationDelay, 
+                    cancellationToken);
             }
         }
 
@@ -162,9 +158,20 @@ namespace InputHumanizer.Input
         public async SyncTask<bool> MoveMouseWindMouseImpl(Vector2 coordinate, double gravityStrength, double windStrength, int minInterpolationDelay, int maxInterpolationDelay, double stepSize, double targetArea, CancellationToken cancellationToken = default)
         {
             Plugin.DebugLog("Mouse Move start");
-            ExileCore.Shared.WinApi.GetCursorPos(out SharpDX.Point startPoint);
-
-            return await Mouse.WindMouseImpl(Plugin, startPoint.X, startPoint.Y, coordinate.X, coordinate.Y, gravityStrength, windStrength, minInterpolationDelay, maxInterpolationDelay, stepSize, targetArea, cancellationToken);
+            var currentPos = ExileCore2.Input.ForceMousePosition;
+            return await Mouse.WindMouseImpl(
+                Plugin,
+                currentPos.X,
+                currentPos.Y,
+                coordinate.X,
+                coordinate.Y,
+                gravityStrength,
+                windStrength,
+                minInterpolationDelay,
+                maxInterpolationDelay,
+                stepSize,
+                targetArea,
+                cancellationToken);
         }
 
         public int GenerateDelay()

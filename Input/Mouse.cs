@@ -1,4 +1,4 @@
-﻿using ExileCore.Shared;
+﻿using ExileCore2.Shared;
 using Kalon;
 using Kalon.Native.Structs;
 using System;
@@ -24,7 +24,7 @@ namespace InputHumanizer.Input
 
         public static async SyncTask<bool> MoveMouse(InputHumanizer plugin, Vector2 targetPosition, int maxInterpolationDistance = 700, int minInterpolationDelay = 0, int maxInterpolationDelay = 300, CancellationToken cancellationToken = default)
         {
-            var currentPosition = ExileCore.Input.ForceMousePositionNum;
+            var currentPosition = ExileCore2.Input.ForceMousePosition;
 
             float distance = Vector2.Distance(currentPosition, targetPosition);
             float normalizedDistance = NormalizeDistance(distance, maxInterpolationDistance);
@@ -33,18 +33,19 @@ namespace InputHumanizer.Input
 
             TimeSpan mouseSpeed = TimeSpan.FromMilliseconds(interpolatedValue + Random.Shared.Next(25, 100));
 
-            var movements = CursorMover.GenerateMovements(new Point((int)currentPosition.X, (int)currentPosition.Y), new Point((int)targetPosition.X, (int)targetPosition.Y), (int)mouseSpeed.TotalMilliseconds);
-
+            var movements = CursorMover.GenerateMovements(
+                new Point((int)currentPosition.X, (int)currentPosition.Y), 
+                new Point((int)targetPosition.X, (int)targetPosition.Y), 
+                (int)mouseSpeed.TotalMilliseconds);
 
             var stopwatch = Stopwatch.StartNew();
             TimeSpan totalDelay = TimeSpan.Zero;
 
-            foreach ( var movement in movements)
+            foreach (var movement in movements)
             {
-                // First, we need to loop through and spam SetCursorPos to get us to each location
                 foreach(var point in movement.Points)
                 {
-                    ExileCore.Input.SetCursorPos(new Vector2(point.X, point.Y));
+                    ExileCore2.Input.SetCursorPos(new Vector2(point.X, point.Y));
                 }
 
                 totalDelay = totalDelay.Add(movement.Delay);
@@ -63,7 +64,6 @@ namespace InputHumanizer.Input
         private static Random random = new Random();
         private static readonly double sqrt3 = Math.Sqrt(3);
         private static readonly double sqrt5 = Math.Sqrt(5);
-
 
         public static async SyncTask<bool> WindMouseImpl(InputHumanizer plugin, double startX, double startY, double destX, double destY,
                                       double gravity, double wind, int minWait,
@@ -121,10 +121,9 @@ namespace InputHumanizer.Input
 
             foreach (var position in positions)
             {
-                ExileCore.Input.SetCursorPos(new Vector2(position.X, position.Y));
+                ExileCore2.Input.SetCursorPos(new Vector2(position.X, position.Y));
 
                 int delay = random.Next(minWait, maxWait);
-
                 totalDelay = totalDelay.Add(TimeSpan.FromMilliseconds(delay));
 
                 if (stopwatch.Elapsed < totalDelay)
