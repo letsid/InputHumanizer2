@@ -1,12 +1,13 @@
-# InputHumanizer
+# InputHumanizer2
 
-An ExileAPI plugin designed to add a single location for all plugins to easily add more human-like inputs. This includes more human-like mouse movement and configurable delays which will apply to all plugins using the library.
+This is a fork of https://github.com/sychotixdev/InputHumanizerLib - All credits to the original dev !  
+An ExileCore2 plugin designed to add a single location for all plugins to easily add more human-like inputs. This includes more human-like mouse movement and configurable delays which will apply to all plugins using the library.
 
 **Installation:**
 
-* Place this plugin in the ```/Plugins/Source/``` directory for ExileAPI.
+* Place this plugin in the ```/Plugins/Source/``` directory for ExileCore2 or use the Plugin downloader.
 
-* Place this library in the root directory. https://github.com/sychotixdev/InputHumanizerLib/releases
+* Place this library in the root directory! [https://github.com/letsid/InputHumanizerLib2/releases/](https://github.com/letsid/InputHumanizerLib2/releases/)
 
 
 **Usage:**
@@ -33,3 +34,5 @@ if ((_inputController = tryGetInputController(this.Name)) != null)
     }
 }
 ```
+
+Sample Plugin at 
